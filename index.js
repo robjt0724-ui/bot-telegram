@@ -18,9 +18,11 @@ Pode ser ação, comédia ou romance… o importante é que você não vai quere
 
 👇   CLIQUE AQUI EM BAIXO 👇
 
-╔════════════════════════════╗
+╔═══════════════╗
+║                                             ║
 ║ https://wa.link/e8t534 ║
-╚════════════════════════════╝
+║                                             ║
+╚═══════════════╝
 
 🚀 Não perde tempo… só dar o play e curtir! 🎥🍿`;
 
