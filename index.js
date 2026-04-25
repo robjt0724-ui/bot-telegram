@@ -44,6 +44,6 @@ setInterval(async () => {
     console.log("Erro:", err.message);
   }
 
-}, 45 * 60 * 1000);
+}, 1 * 60 * 1000);
 
 console.log("BOT FINAL RODANDO");
