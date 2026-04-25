@@ -9,7 +9,20 @@ const grupoA = -1002110613167;
 const grupoB = -1001831601806;
 
 // MENSAGEM
-const legenda = `🔥🎬 TEM FILME BOM TE ESPERANDO AGORA! 🍿✨
+const legendaPadrao = `🔥🎬 TEM FILME BOM TE ESPERANDO AGORA! 🍿✨
+
+Aquele tipo de filme que te prende do começo ao fim 😱💥
+Pode ser ação, comédia ou romance… o importante é que você não vai querer parar de assistir! 👀🔥
+
+📲 Quer assistir agora? Me chama no WhatsApp 👇💬
+
+👇   CLIQUE AQUI EM BAIXO 👇
+
+╔════════════════════════════╗
+║ https://wa.link/e8t534 ║
+╚════════════════════════════╝
+
+🚀 Não perde tempo… só dar o play e curtir! 🎥🍿`;
 
 📲 Me chama no WhatsApp 👇
 https://wa.link/e8t534`;
