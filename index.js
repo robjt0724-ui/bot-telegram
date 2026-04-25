@@ -2,14 +2,12 @@ const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TOKEN;
 
-// cria bot
-const bot = new TelegramBot(token, {
-  polling: {
-    autoStart: false
-  }
-});
+const bot = new TelegramBot(token, { polling: true });
 
-// reinicia polling limpo
-bot.stopPolling().then(() => {
-  bot.startPolling();
+bot.on('message', (msg) => {
+  console.log("==================================");
+  console.log("NOME DO GRUPO:", msg.chat.title);
+  console.log("ID DO GRUPO:", msg.chat.id);
+  console.log("TIPO:", msg.chat.type);
+  console.log("==================================");
 });
