@@ -1,7 +1,3 @@
-if (process.env.DISABLE === "true") {
-  console.log("Bot desativado");
-  process.exit(0);
-}
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TOKEN;
