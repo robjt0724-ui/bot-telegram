@@ -7,55 +7,64 @@ const path = require('path');
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-// GRUPOS
+// ================== GRUPOS ==================
 const grupoC = -1003906204677;
 const grupoA = -1002110613167;
 const grupoB = -1001831601806;
 
-// FILA
+// ================== ESTADO GLOBAL ==================
 let fila = [];
+let pausado = false;
+let intervaloMinutos = 45;
+let enviados = 0;
 
-// 🔥 MENSAGENS VARIADAS (ALEATÓRIAS)
+// ================== PERSISTÊNCIA SIMPLES ==================
+const filaFile = "fila.json";
+
+function salvarFila() {
+  fs.writeFileSync(filaFile, JSON.stringify(fila));
+}
+
+function carregarFila() {
+  if (fs.existsSync(filaFile)) {
+    fila = JSON.parse(fs.readFileSync(filaFile));
+  }
+}
+
+carregarFila();
+
+// ================== MENSAGENS ==================
 const mensagens = [
-`🎬🍿 Tem gente pagando vários apps sem nem usar direito…
-Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação.
+`🎬🍿 Tem gente pagando vários apps sem nem usar direito… 😑
+Aqui você resolve tudo em um só lugar 🔥
 
 💰 Só R$35 por mês
-⏱️ Teste grátis por 3 horas
+⏱️ Teste grátis 3 horas`,
 
-👉 Clique nos botões abaixo e saiba mais.`,
+`🎬 Você ainda fica procurando filme e não acha nada bom? 😑
+Aqui já tá tudo pronto pra assistir 🔥
 
-`🎬 Você ainda fica procurando filme e não acha nada bom?
-Aqui já tá tudo pronto pra assistir.
+💰 R$35/mês
+⏱️ Teste grátis 3h`,
 
-💰 Acesso por R$35/mês
-⏱️ Teste grátis de 3 horas
+`🍿 Chega de pular de app em app… 😤
+Aqui é tudo em um só lugar 🔥
 
-👉 Clique nos botões abaixo e saiba mais.`,
+💰 R$35/mês
+⏱️ Teste grátis 3h`,
 
-`🍿 Chega de pular de app em app sem achar nada…
-Aqui você tem tudo em um só lugar.
+`🎬 Isso aqui poucos conhecem… 👀
+Mas quem usa não larga 🔥
 
-💰 R$35 por mês
-⏱️ 3 horas grátis pra testar
-
-👉 Clique nos botões abaixo e saiba mais.`,
-
-`🎬 Isso aqui ainda é pouco conhecido…
-Mas quem usa não larga mais.
-
-💰 Só R$35/mês
-⏱️ Teste grátis por 3 horas
-
-👉 Clique nos botões abaixo e saiba mais.`
+💰 R$35/mês
+⏱️ Teste grátis`
 ];
 
-// 🎲 PEGAR MENSAGEM ALEATÓRIA
-function mensagemAleatoria() {
+function msgAleatoria() {
   return mensagens[Math.floor(Math.random() * mensagens.length)];
 }
 
-// BOTÕES
+// ================== BOTÕES ==================
 const botoes = {
   reply_markup: {
     inline_keyboard: [
@@ -67,25 +76,49 @@ const botoes = {
   }
 };
 
-// CAPTURA IMAGENS
+// ================== PAINEL DE CONTROLE ==================
+bot.onText(/\/pause/, (msg) => {
+  pausado = true;
+  bot.sendMessage(msg.chat.id, "⏸️ Bot pausado");
+});
+
+bot.onText(/\/resume/, (msg) => {
+  pausado = false;
+  bot.sendMessage(msg.chat.id, "▶️ Bot retomado");
+});
+
+bot.onText(/\/status/, (msg) => {
+  bot.sendMessage(msg.chat.id,
+`📊 STATUS
+
+⏸️ Pausado: ${pausado}
+⏱️ Intervalo: ${intervaloMinutos} min
+📥 Fila: ${fila.length}
+📤 Enviados: ${enviados}`);
+});
+
+bot.onText(/\/fila/, (msg) => {
+  bot.sendMessage(msg.chat.id, `📥 Itens na fila: ${fila.length}`);
+});
+
+bot.onText(/\/settime (\d+)/, (msg, match) => {
+  intervaloMinutos = parseInt(match[1]);
+  bot.sendMessage(msg.chat.id, `⏱️ Novo intervalo: ${intervaloMinutos} minutos`);
+});
+
+// ================== CAPTURA ==================
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
-
+    salvarFila();
     console.log("📥 fila:", fila.length);
   }
 });
 
-// BAIXAR IMAGEM
-async function baixarImagem(url) {
-  const res = await axios({ url, responseType: 'arraybuffer' });
-  return Buffer.from(res.data);
-}
-
-// 🖼️ IMAGEM 1000x1413 + BORDAS (SEM CORTAR)
+// ================== IMAGEM PROFISSIONAL ==================
 async function processarImagem(buffer) {
   return await sharp(buffer)
     .resize(1000, 1413, {
@@ -103,42 +136,49 @@ async function processarImagem(buffer) {
     .toBuffer();
 }
 
-// ⏱️ ENVIO A CADA 45 MINUTOS
-setInterval(async () => {
-  if (fila.length === 0) return;
+// ================== LOOP DINÂMICO ==================
+async function loop() {
+  if (!pausado && fila.length > 0) {
+    const fileId = fila.shift();
+    salvarFila();
 
-  const fileId = fila.shift();
+    try {
+      const file = await bot.getFile(fileId);
+      const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
 
-  try {
-    const file = await bot.getFile(fileId);
-    const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
+      const res = await axios({ url, responseType: 'arraybuffer' });
+      const buffer = Buffer.from(res.data);
 
-    const original = await baixarImagem(url);
-    const finalImage = await processarImagem(original);
+      const finalImage = await processarImagem(buffer);
 
-    const tempPath = path.join(__dirname, "temp.jpg");
-    fs.writeFileSync(tempPath, finalImage);
+      const temp = path.join(__dirname, "temp.jpg");
+      fs.writeFileSync(temp, finalImage);
 
-    const texto = mensagemAleatoria();
+      const texto = msgAleatoria();
 
-    await bot.sendPhoto(grupoA, tempPath, {
-      caption: texto,
-      ...botoes
-    });
+      await bot.sendPhoto(grupoA, temp, {
+        caption: texto,
+        ...botoes
+      });
 
-    await bot.sendPhoto(grupoB, tempPath, {
-      caption: texto,
-      ...botoes
-    });
+      await bot.sendPhoto(grupoB, temp, {
+        caption: texto,
+        ...botoes
+      });
 
-    fs.unlinkSync(tempPath);
+      fs.unlinkSync(temp);
 
-    console.log("✅ enviado com sucesso (45 min + aleatório)");
+      enviados++;
+      console.log("✅ enviado:", enviados);
 
-  } catch (err) {
-    console.log("❌ erro:", err.message);
+    } catch (err) {
+      console.log("❌ erro:", err.message);
+    }
   }
 
-}, 45 * 60 * 1000); // ⏱️ 45 minutos
+  setTimeout(loop, intervaloMinutos * 60 * 1000);
+}
 
-console.log("🚀 BOT RODANDO: 45 MIN + MENSAGENS ALEATÓRIAS + IMAGEM PROFISSIONAL");
+loop();
+
+console.log("🚀 BOT PROFISSIONAL RODANDO COM CONTROLE TOTAL");
