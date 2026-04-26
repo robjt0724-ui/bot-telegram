@@ -28,39 +28,27 @@ const botoes = {
   }
 };
 
-// MENSAGENS
+// MENSAGENS (ROTATIVAS)
 const mensagens = [
 `🎬🍿 Tudo em um só lugar.
 💰 R$35/mês
 ⏱️ Teste grátis
+👉 Clique nos botões abaixo e saiba mais.`,
+
+`🎬 Filmes e séries sem complicação.
+💰 Apenas R$35 por mês
+⏱️ Teste grátis por 3 horas
 👉 Clique nos botões abaixo e saiba mais.`
 ];
 
-// ROTATIVO
+// mensagem rotativa
 function proximaMensagem() {
   const msg = mensagens[indexMsg];
   indexMsg = (indexMsg + 1) % mensagens.length;
   return msg;
 }
 
-// BAIXAR IMAGEM
-async function baixarImagem(url) {
-  const res = await axios({ url, responseType: 'arraybuffer' });
-  return Buffer.from(res.data);
-}
-
-// ✨ IMAGEM PROFISSIONAL 1000x1413 COM BORDAS (SEM CORTAR)
-async function processarImagem(buffer) {
-  return await sharp(buffer)
-    .resize(1000, 1413, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0 } // borda preta
-    })
-    .jpeg({ quality: 90 })
-    .toBuffer();
-}
-
-// CAPTURA IMAGENS
+// CAPTURA IMAGENS DO GRUPO C
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
@@ -68,9 +56,33 @@ bot.on('message', (msg) => {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
 
-    console.log("📥 fila:", fila.length);
+    console.log("📥 imagem na fila:", fila.length);
   }
 });
+
+// BAIXAR IMAGEM
+async function baixarImagem(url) {
+  const res = await axios({ url, responseType: 'arraybuffer' });
+  return Buffer.from(res.data);
+}
+
+// 🖼️ PROCESSAMENTO FINAL (SEM CORTE + BORDAS 2X MAIORES)
+async function processarImagem(buffer) {
+  return await sharp(buffer)
+    .resize(1000, 1413, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0 }
+    })
+    .extend({
+      top: 200,
+      bottom: 200,
+      left: 150,
+      right: 150,
+      background: { r: 0, g: 0, b: 0 }
+    })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+}
 
 // ENVIO AUTOMÁTICO
 setInterval(async () => {
@@ -88,11 +100,13 @@ setInterval(async () => {
     const tempPath = path.join(__dirname, "temp.jpg");
     fs.writeFileSync(tempPath, finalImage);
 
+    // ENVIO GRUPO A
     await bot.sendPhoto(grupoA, tempPath, {
       caption: proximaMensagem(),
       ...botoes
     });
 
+    // ENVIO GRUPO B
     await bot.sendPhoto(grupoB, tempPath, {
       caption: proximaMensagem(),
       ...botoes
@@ -100,7 +114,7 @@ setInterval(async () => {
 
     fs.unlinkSync(tempPath);
 
-    console.log("✅ enviada 1000x1413 com borda");
+    console.log("✅ enviado com bordas 2x e sem corte");
 
   } catch (err) {
     console.log("❌ erro:", err.message);
@@ -108,4 +122,4 @@ setInterval(async () => {
 
 }, 60 * 1000);
 
-console.log("🚀 BOT PROFISSIONAL 1000x1413 RODANDO");
+console.log("🚀 BOT FINAL RODANDO (SEM CORTE + BORDAS 2X + FILA)");
