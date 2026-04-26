@@ -1,8 +1,4 @@
 const TelegramBot = require('node-telegram-bot-api');
-const axios = require('axios');
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
 
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -43,68 +39,40 @@ function proximaMensagem() {
   return msg;
 }
 
-// BAIXAR IMAGEM
-async function baixarImagem(url) {
-  const res = await axios({ url, responseType: 'arraybuffer' });
-  return Buffer.from(res.data);
-}
-
-// ✨ OPÇÃO 1 — SEM CORTAR (MELHOR AQUI)
-async function processarImagem(buffer) {
-  return await sharp(buffer)
-    .resize(1280, 720, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0 }
-    })
-    .jpeg({ quality: 90 })
-    .toBuffer();
-}
-
-// CAPTURA IMAGENS
-bot.on('message', async (msg) => {
+// CAPTURA IMAGENS (SEM ALTERAR NADA)
+bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
-    console.log("📥 fila:", fila.length);
+
+    console.log("📥 imagem na fila:", fila.length);
   }
 });
 
-// ENVIO AUTOMÁTICO
+// ENVIO DIRETO (SEM SHARP, SEM CORTE, SEM DEFORMAÇÃO)
 setInterval(async () => {
   if (fila.length === 0) return;
 
-  const fileId = fila.shift();
+  const img = fila.shift();
 
   try {
-    const file = await bot.getFile(fileId);
-    const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
-
-    const original = await baixarImagem(url);
-    const finalImage = await processarImagem(original);
-
-    const tempPath = path.join(__dirname, "temp.jpg");
-    fs.writeFileSync(tempPath, finalImage);
-
-    await bot.sendPhoto(grupoA, tempPath, {
+    await bot.sendPhoto(grupoA, img, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    await bot.sendPhoto(grupoB, tempPath, {
+    await bot.sendPhoto(grupoB, img, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    fs.unlinkSync(tempPath);
-
-    console.log("✅ enviada sem corte (contain)");
-
+    console.log("✅ enviada no formato original");
   } catch (err) {
     console.log("❌ erro:", err.message);
   }
 
 }, 60 * 1000);
 
-console.log("🚀 BOT RODANDO COM IMAGEM SEM CORTES");
+console.log("🚀 BOT RODANDO EM MODO IMAGEM ORIGINAL");
