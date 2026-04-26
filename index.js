@@ -43,7 +43,7 @@ Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação.
 `🎬 Você ainda perde tempo procurando filme e não acha nada bom?
 Aqui já está tudo pronto pra assistir.
 
-💰 Acesso por R$35/mês
+💰 R$35/mês
 ⏱️ Teste grátis de 3 horas
 
 👉 Clique nos botões abaixo e saiba mais.`,
@@ -52,7 +52,7 @@ Aqui já está tudo pronto pra assistir.
 Aqui você tem tudo em um só lugar.
 
 💰 R$35 por mês
-⏱️ 3 horas grátis pra testar
+⏱️ 3 horas grátis
 
 👉 Clique nos botões abaixo e saiba mais.`,
 
@@ -72,7 +72,7 @@ function proximaMensagem() {
   return msg;
 }
 
-// 📥 CAPTURA IMAGENS (FILE_ID ORIGINAL = MELHOR QUALIDADE POSSÍVEL)
+// 📥 CAPTURA IMAGENS
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
@@ -80,33 +80,34 @@ bot.on('message', (msg) => {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
 
-    console.log("📥 Imagem adicionada na fila:", fila.length);
+    console.log("📥 Imagem na fila:", fila.length);
   }
 });
 
-// ⏳ ENVIO AUTOMÁTICO
+// ⏳ ENVIO AUTOMÁTICO (DOCUMENTO = ORIGINAL SEM COMPRESSÃO)
 setInterval(async () => {
   if (fila.length === 0) return;
 
   const img = fila.shift();
 
   try {
-    // ENVIO COMO FOTO (FORMATO CORRETO PARA VISUAL GRANDE)
-    await bot.sendPhoto(grupoA, img, {
+    // GRUPO A
+    await bot.sendDocument(grupoA, img, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    await bot.sendPhoto(grupoB, img, {
+    // GRUPO B
+    await bot.sendDocument(grupoB, img, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    console.log("✅ Enviado com sucesso. Fila:", fila.length);
+    console.log("✅ Enviado como DOCUMENTO. Fila:", fila.length);
   } catch (err) {
     console.log("❌ Erro:", err.message);
   }
 
-}, 1 * 60 * 1000);
+}, 60 * 1000);
 
-console.log("🚀 BOT RODANDO COM FOTO OTIMIZADA");
+console.log("🚀 BOT RODANDO EM MODO DOCUMENTO (QUALIDADE ORIGINAL)");
