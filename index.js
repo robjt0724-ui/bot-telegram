@@ -12,7 +12,7 @@ const grupoB = -1001831601806;
 let fila = [];
 let indexMsg = 0;
 
-// 🔘 BOTÕES (2 lado a lado)
+// 🔘 BOTÕES
 const botoes = {
   reply_markup: {
     inline_keyboard: [
@@ -30,145 +30,39 @@ const botoes = {
   }
 };
 
-// 🔁 MENSAGENS (SUAS COMPLETAS)
+// 🔁 MENSAGENS
 const mensagens = [
-`🎬🍿 Tem gente pagando vários apps sem nem usar direito… 😑
-Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação 🔥
+`🎬🍿 Tem gente pagando vários apps sem nem usar direito…
+Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação.
 
-💰 Só R$35 por mês
+💰 Apenas R$35 por mês
 ⏱️ Teste grátis por 3 horas
 
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
+👉 Clique nos botões abaixo e saiba mais.`,
 
-`🎬 Você ainda fica procurando filme e não acha nada bom? 😑
-Aqui já tá tudo pronto pra assistir 🔥
+`🎬 Você ainda perde tempo procurando filme e não acha nada bom?
+Aqui já está tudo pronto pra assistir.
 
 💰 Acesso por R$35/mês
 ⏱️ Teste grátis de 3 horas
 
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
+👉 Clique nos botões abaixo e saiba mais.`,
 
-`🍿 Chega de pular de app em app sem achar nada… 😤
-Aqui você tem tudo em um só lugar 🔥
+`🍿 Chega de pular de app em app sem resultado.
+Aqui você tem tudo em um só lugar.
 
 💰 R$35 por mês
 ⏱️ 3 horas grátis pra testar
 
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
+👉 Clique nos botões abaixo e saiba mais.`,
 
-`🎬 Isso aqui ainda é pouco conhecido… 👀
-Mas quem começa a usar não larga mais 🔥
+`🎬 Isso ainda é pouco conhecido…
+Mas quem usa não troca mais.
 
-💰 Só R$35/mês
+💰 Apenas R$35/mês
 ⏱️ Teste grátis por 3 horas
 
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 Você perde mais tempo escolhendo do que assistindo? 😑
-Aqui já tá tudo organizado pra você 🔥
-
-💰 R$35 mensal
-⏱️ Teste grátis de 3h
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Nem todo mundo conhece isso ainda… 👀
-Mas já tem gente usando todo dia 🔥
-
-💰 R$35 por mês
-⏱️ 3 horas grátis
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 Cansado de não achar nada bom pra assistir? 😤
-Aqui só tem conteúdo que realmente vale a pena 🔥
-
-💰 Só R$35/mês
-⏱️ Teste grátis por 3h
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Isso aqui facilita demais na hora de assistir… 🔥
-Tudo em um só lugar, sem enrolação 👀
-
-💰 R$35 mensal
-⏱️ 3 horas grátis pra testar
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 Tem gente descobrindo isso agora… 👀
-E não quer mais saber de outro app 🔥
-
-💰 R$35 por mês
-⏱️ Teste grátis de 3h
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Chega de complicação pra assistir filme 😑
-Aqui é simples e direto 🔥
-
-💰 Só R$35/mês
-⏱️ 3 horas grátis
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬🍿 Tá cansado de abrir app e não achar nada bom? 😑
-Aqui já tá tudo organizado pra você só entrar e assistir 🔥
-
-💰 R$35 por mês
-⏱️ Teste grátis de 3 horas
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 A verdade é que hoje você paga vários apps…
-e mesmo assim não acha nada que anima 😑
-
-Aqui é diferente. Tudo em um só lugar 🔥
-
-💰 Só R$35/mês
-⏱️ 3 horas grátis pra testar
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Você não precisa de vários aplicativos pra assistir bem… 😤
-Com um só já resolve tudo 🔥
-
-💰 R$35 mensal
-⏱️ Teste grátis de 3h
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 Muita gente ainda não percebeu isso… 👀
-Dá pra ter tudo em um lugar só e pagar bem menos 🔥
-
-💰 Só R$35 por mês
-⏱️ 3 horas grátis
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Chega de complicar na hora de assistir… 😑
-Aqui é só entrar e dar play 🔥
-
-💰 R$35/mês
-⏱️ Teste grátis por 3 horas
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🍿 Tem gente economizando e assistindo muito mais… 👀
-Tudo porque parou de usar vários apps separados 🔥
-
-💰 Só R$35 mensal
-⏱️ 3h grátis pra testar
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`,
-
-`🎬 Se você gosta de assistir sem dor de cabeça… 😌
-Isso aqui resolve fácil 🔥
-
-💰 R$35 por mês
-⏱️ Teste grátis de 3 horas
-
-👉 clique no nosso WhatsApp aqui agora: https://wa.link/e8t534`
+👉 Clique nos botões abaixo e saiba mais.`
 ];
 
 // 🔁 ROTATIVO
@@ -178,7 +72,7 @@ function proximaMensagem() {
   return msg;
 }
 
-// 📥 CAPTURA IMAGENS
+// 📥 CAPTURA IMAGENS (FILE_ID ORIGINAL = MELHOR QUALIDADE POSSÍVEL)
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
@@ -186,7 +80,7 @@ bot.on('message', (msg) => {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
 
-    console.log("Fila:", fila.length);
+    console.log("📥 Imagem adicionada na fila:", fila.length);
   }
 });
 
@@ -197,6 +91,7 @@ setInterval(async () => {
   const img = fila.shift();
 
   try {
+    // ENVIO COMO FOTO (FORMATO CORRETO PARA VISUAL GRANDE)
     await bot.sendPhoto(grupoA, img, {
       caption: proximaMensagem(),
       ...botoes
@@ -207,11 +102,11 @@ setInterval(async () => {
       ...botoes
     });
 
-    console.log("Enviado. Fila:", fila.length);
+    console.log("✅ Enviado com sucesso. Fila:", fila.length);
   } catch (err) {
-    console.log("Erro:", err.message);
+    console.log("❌ Erro:", err.message);
   }
 
 }, 1 * 60 * 1000);
 
-console.log("🚀 BOT COM 2 BOTÕES RODANDO");
+console.log("🚀 BOT RODANDO COM FOTO OTIMIZADA");
