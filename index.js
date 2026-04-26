@@ -1,4 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -39,7 +43,24 @@ function proximaMensagem() {
   return msg;
 }
 
-// CAPTURA IMAGENS (SEM ALTERAR NADA)
+// BAIXAR IMAGEM
+async function baixarImagem(url) {
+  const res = await axios({ url, responseType: 'arraybuffer' });
+  return Buffer.from(res.data);
+}
+
+// ✨ IMAGEM PROFISSIONAL 1000x1413 COM BORDAS (SEM CORTAR)
+async function processarImagem(buffer) {
+  return await sharp(buffer)
+    .resize(1000, 1413, {
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0 } // borda preta
+    })
+    .jpeg({ quality: 90 })
+    .toBuffer();
+}
+
+// CAPTURA IMAGENS
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
@@ -47,32 +68,44 @@ bot.on('message', (msg) => {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
 
-    console.log("📥 imagem na fila:", fila.length);
+    console.log("📥 fila:", fila.length);
   }
 });
 
-// ENVIO DIRETO (SEM SHARP, SEM CORTE, SEM DEFORMAÇÃO)
+// ENVIO AUTOMÁTICO
 setInterval(async () => {
   if (fila.length === 0) return;
 
-  const img = fila.shift();
+  const fileId = fila.shift();
 
   try {
-    await bot.sendPhoto(grupoA, img, {
+    const file = await bot.getFile(fileId);
+    const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
+
+    const original = await baixarImagem(url);
+    const finalImage = await processarImagem(original);
+
+    const tempPath = path.join(__dirname, "temp.jpg");
+    fs.writeFileSync(tempPath, finalImage);
+
+    await bot.sendPhoto(grupoA, tempPath, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    await bot.sendPhoto(grupoB, img, {
+    await bot.sendPhoto(grupoB, tempPath, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    console.log("✅ enviada no formato original");
+    fs.unlinkSync(tempPath);
+
+    console.log("✅ enviada 1000x1413 com borda");
+
   } catch (err) {
     console.log("❌ erro:", err.message);
   }
 
 }, 60 * 1000);
 
-console.log("🚀 BOT RODANDO EM MODO IMAGEM ORIGINAL");
+console.log("🚀 BOT PROFISSIONAL 1000x1413 RODANDO");
