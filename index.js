@@ -1,4 +1,8 @@
 const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 
 const token = process.env.TOKEN;
 const bot = new TelegramBot(token, { polling: true });
@@ -8,68 +12,50 @@ const grupoC = -1003906204677;
 const grupoA = -1002110613167;
 const grupoB = -1001831601806;
 
-// 📥 FILA
+// FILA
 let fila = [];
 let indexMsg = 0;
 
-// 🔘 BOTÕES
+// BOTÕES
 const botoes = {
   reply_markup: {
     inline_keyboard: [
       [
-        {
-          text: "👉 VER AGORA 🔥",
-          url: "https://wa.link/e8t534"
-        },
-        {
-          text: "🎁 TESTE GRÁTIS",
-          url: "https://wa.link/e8t534"
-        }
+        { text: "👉 VER AGORA 🔥", url: "https://wa.link/e8t534" },
+        { text: "🎁 TESTE GRÁTIS", url: "https://wa.link/e8t534" }
       ]
     ]
   }
 };
 
-// 🔁 MENSAGENS
+// MENSAGENS
 const mensagens = [
-`🎬🍿 Tem gente pagando vários apps sem nem usar direito…
-Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação.
-
-💰 Apenas R$35 por mês
-⏱️ Teste grátis por 3 horas
-
-👉 Clique nos botões abaixo e saiba mais.`,
-
-`🎬 Você ainda perde tempo procurando filme e não acha nada bom?
-Aqui já está tudo pronto pra assistir.
-
+`🎬🍿 Tudo em um só lugar, sem complicação.
 💰 R$35/mês
-⏱️ Teste grátis de 3 horas
-
-👉 Clique nos botões abaixo e saiba mais.`,
-
-`🍿 Chega de pular de app em app sem resultado.
-Aqui você tem tudo em um só lugar.
-
-💰 R$35 por mês
-⏱️ 3 horas grátis
-
-👉 Clique nos botões abaixo e saiba mais.`,
-
-`🎬 Isso ainda é pouco conhecido…
-Mas quem usa não troca mais.
-
-💰 Apenas R$35/mês
-⏱️ Teste grátis por 3 horas
-
+⏱️ 3h grátis
 👉 Clique nos botões abaixo e saiba mais.`
 ];
 
-// 🔁 ROTATIVO
 function proximaMensagem() {
   const msg = mensagens[indexMsg];
   indexMsg = (indexMsg + 1) % mensagens.length;
   return msg;
+}
+
+// 🔽 BAIXAR IMAGEM
+async function baixarImagem(url) {
+  const response = await axios({ url, responseType: 'arraybuffer' });
+  return Buffer.from(response.data);
+}
+
+// ✂️ PROCESSAR IMAGEM (FORÇA FORMATO 16:9)
+async function processarImagem(buffer) {
+  return await sharp(buffer)
+    .resize(1280, 720, {
+      fit: "cover"
+    })
+    .jpeg({ quality: 90 })
+    .toBuffer();
 }
 
 // 📥 CAPTURA IMAGENS
@@ -79,35 +65,49 @@ bot.on('message', (msg) => {
   if (msg.photo) {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
-
-    console.log("📥 Imagem na fila:", fila.length);
+    console.log("📥 fila:", fila.length);
   }
 });
 
-// ⏳ ENVIO AUTOMÁTICO (DOCUMENTO = ORIGINAL SEM COMPRESSÃO)
+// ⏳ ENVIO PROCESSADO
 setInterval(async () => {
   if (fila.length === 0) return;
 
-  const img = fila.shift();
+  const fileId = fila.shift();
 
   try {
-    // GRUPO A
-    await bot.sendDocument(grupoA, img, {
+    // pega link do telegram
+    const file = await bot.getFile(fileId);
+    const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
+
+    // baixa imagem
+    const original = await baixarImagem(url);
+
+    // processa (16:9 profissional)
+    const finalImage = await processarImagem(original);
+
+    const tempPath = path.join(__dirname, "temp.jpg");
+    fs.writeFileSync(tempPath, finalImage);
+
+    // envia como arquivo processado
+    await bot.sendPhoto(grupoA, tempPath, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    // GRUPO B
-    await bot.sendDocument(grupoB, img, {
+    await bot.sendPhoto(grupoB, tempPath, {
       caption: proximaMensagem(),
       ...botoes
     });
 
-    console.log("✅ Enviado como DOCUMENTO. Fila:", fila.length);
+    fs.unlinkSync(tempPath);
+
+    console.log("✅ imagem processada enviada");
+
   } catch (err) {
-    console.log("❌ Erro:", err.message);
+    console.log("❌ erro:", err.message);
   }
 
 }, 60 * 1000);
 
-console.log("🚀 BOT RODANDO EM MODO DOCUMENTO (QUALIDADE ORIGINAL)");
+console.log("🚀 BOT PROFISSIONAL COM PROCESSAMENTO DE IMAGEM RODANDO");
