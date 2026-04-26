@@ -14,7 +14,46 @@ const grupoB = -1001831601806;
 
 // FILA
 let fila = [];
-let indexMsg = 0;
+
+// 🔥 MENSAGENS VARIADAS (ALEATÓRIAS)
+const mensagens = [
+`🎬🍿 Tem gente pagando vários apps sem nem usar direito…
+Aqui você resolve tudo em um só lugar, com filmes e séries sem complicação.
+
+💰 Só R$35 por mês
+⏱️ Teste grátis por 3 horas
+
+👉 Clique nos botões abaixo e saiba mais.`,
+
+`🎬 Você ainda fica procurando filme e não acha nada bom?
+Aqui já tá tudo pronto pra assistir.
+
+💰 Acesso por R$35/mês
+⏱️ Teste grátis de 3 horas
+
+👉 Clique nos botões abaixo e saiba mais.`,
+
+`🍿 Chega de pular de app em app sem achar nada…
+Aqui você tem tudo em um só lugar.
+
+💰 R$35 por mês
+⏱️ 3 horas grátis pra testar
+
+👉 Clique nos botões abaixo e saiba mais.`,
+
+`🎬 Isso aqui ainda é pouco conhecido…
+Mas quem usa não larga mais.
+
+💰 Só R$35/mês
+⏱️ Teste grátis por 3 horas
+
+👉 Clique nos botões abaixo e saiba mais.`
+];
+
+// 🎲 PEGAR MENSAGEM ALEATÓRIA
+function mensagemAleatoria() {
+  return mensagens[Math.floor(Math.random() * mensagens.length)];
+}
 
 // BOTÕES
 const botoes = {
@@ -28,27 +67,7 @@ const botoes = {
   }
 };
 
-// MENSAGENS (ROTATIVAS)
-const mensagens = [
-`🎬🍿 Tudo em um só lugar.
-💰 R$35/mês
-⏱️ Teste grátis
-👉 Clique nos botões abaixo e saiba mais.`,
-
-`🎬 Filmes e séries sem complicação.
-💰 Apenas R$35 por mês
-⏱️ Teste grátis por 3 horas
-👉 Clique nos botões abaixo e saiba mais.`
-];
-
-// mensagem rotativa
-function proximaMensagem() {
-  const msg = mensagens[indexMsg];
-  indexMsg = (indexMsg + 1) % mensagens.length;
-  return msg;
-}
-
-// CAPTURA IMAGENS DO GRUPO C
+// CAPTURA IMAGENS
 bot.on('message', (msg) => {
   if (msg.chat.id !== grupoC) return;
 
@@ -56,7 +75,7 @@ bot.on('message', (msg) => {
     const fileId = msg.photo[msg.photo.length - 1].file_id;
     fila.push(fileId);
 
-    console.log("📥 imagem na fila:", fila.length);
+    console.log("📥 fila:", fila.length);
   }
 });
 
@@ -66,7 +85,7 @@ async function baixarImagem(url) {
   return Buffer.from(res.data);
 }
 
-// 🖼️ PROCESSAMENTO FINAL (SEM CORTE + BORDAS 2X MAIORES)
+// 🖼️ IMAGEM 1000x1413 + BORDAS (SEM CORTAR)
 async function processarImagem(buffer) {
   return await sharp(buffer)
     .resize(1000, 1413, {
@@ -84,7 +103,7 @@ async function processarImagem(buffer) {
     .toBuffer();
 }
 
-// ENVIO AUTOMÁTICO
+// ⏱️ ENVIO A CADA 45 MINUTOS
 setInterval(async () => {
   if (fila.length === 0) return;
 
@@ -100,26 +119,26 @@ setInterval(async () => {
     const tempPath = path.join(__dirname, "temp.jpg");
     fs.writeFileSync(tempPath, finalImage);
 
-    // ENVIO GRUPO A
+    const texto = mensagemAleatoria();
+
     await bot.sendPhoto(grupoA, tempPath, {
-      caption: proximaMensagem(),
+      caption: texto,
       ...botoes
     });
 
-    // ENVIO GRUPO B
     await bot.sendPhoto(grupoB, tempPath, {
-      caption: proximaMensagem(),
+      caption: texto,
       ...botoes
     });
 
     fs.unlinkSync(tempPath);
 
-    console.log("✅ enviado com bordas 2x e sem corte");
+    console.log("✅ enviado com sucesso (45 min + aleatório)");
 
   } catch (err) {
     console.log("❌ erro:", err.message);
   }
 
-}, 60 * 1000);
+}, 45 * 60 * 1000); // ⏱️ 45 minutos
 
-console.log("🚀 BOT FINAL RODANDO (SEM CORTE + BORDAS 2X + FILA)");
+console.log("🚀 BOT RODANDO: 45 MIN + MENSAGENS ALEATÓRIAS + IMAGEM PROFISSIONAL");
