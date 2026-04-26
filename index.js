@@ -30,36 +30,38 @@ const botoes = {
 
 // MENSAGENS
 const mensagens = [
-`🎬🍿 Tudo em um só lugar, sem complicação.
+`🎬🍿 Tudo em um só lugar.
 💰 R$35/mês
-⏱️ 3h grátis
+⏱️ Teste grátis
 👉 Clique nos botões abaixo e saiba mais.`
 ];
 
+// ROTATIVO
 function proximaMensagem() {
   const msg = mensagens[indexMsg];
   indexMsg = (indexMsg + 1) % mensagens.length;
   return msg;
 }
 
-// 🔽 BAIXAR IMAGEM
+// BAIXAR IMAGEM
 async function baixarImagem(url) {
-  const response = await axios({ url, responseType: 'arraybuffer' });
-  return Buffer.from(response.data);
+  const res = await axios({ url, responseType: 'arraybuffer' });
+  return Buffer.from(res.data);
 }
 
-// ✂️ PROCESSAR IMAGEM (FORÇA FORMATO 16:9)
+// ✨ OPÇÃO 1 — SEM CORTAR (MELHOR AQUI)
 async function processarImagem(buffer) {
   return await sharp(buffer)
     .resize(1280, 720, {
-      fit: "cover"
+      fit: "contain",
+      background: { r: 0, g: 0, b: 0 }
     })
     .jpeg({ quality: 90 })
     .toBuffer();
 }
 
-// 📥 CAPTURA IMAGENS
-bot.on('message', (msg) => {
+// CAPTURA IMAGENS
+bot.on('message', async (msg) => {
   if (msg.chat.id !== grupoC) return;
 
   if (msg.photo) {
@@ -69,27 +71,22 @@ bot.on('message', (msg) => {
   }
 });
 
-// ⏳ ENVIO PROCESSADO
+// ENVIO AUTOMÁTICO
 setInterval(async () => {
   if (fila.length === 0) return;
 
   const fileId = fila.shift();
 
   try {
-    // pega link do telegram
     const file = await bot.getFile(fileId);
     const url = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
 
-    // baixa imagem
     const original = await baixarImagem(url);
-
-    // processa (16:9 profissional)
     const finalImage = await processarImagem(original);
 
     const tempPath = path.join(__dirname, "temp.jpg");
     fs.writeFileSync(tempPath, finalImage);
 
-    // envia como arquivo processado
     await bot.sendPhoto(grupoA, tempPath, {
       caption: proximaMensagem(),
       ...botoes
@@ -102,7 +99,7 @@ setInterval(async () => {
 
     fs.unlinkSync(tempPath);
 
-    console.log("✅ imagem processada enviada");
+    console.log("✅ enviada sem corte (contain)");
 
   } catch (err) {
     console.log("❌ erro:", err.message);
@@ -110,4 +107,4 @@ setInterval(async () => {
 
 }, 60 * 1000);
 
-console.log("🚀 BOT PROFISSIONAL COM PROCESSAMENTO DE IMAGEM RODANDO");
+console.log("🚀 BOT RODANDO COM IMAGEM SEM CORTES");
